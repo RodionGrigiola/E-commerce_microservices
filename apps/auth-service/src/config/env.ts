@@ -2,7 +2,18 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+function getEnv(name: string): string {
+  const value = process.env[name];
+
+  if (!value) {
+    throw new Error(`Missing env variable: ${name}`);
+  }
+
+  return value;
+}
+
 export const env = {
-  JWT_SECRET: process.env.JWT_SECRET || "secret",
-  PORT: process.env.PORT || 3001,
+  JWT_SECRET: getEnv("JWT_SECRET"),
+  DATABASE_URL: getEnv("DATABASE_URL"),
+  PORT: Number(getEnv("PORT")),
 };

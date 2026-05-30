@@ -1,6 +1,17 @@
-version: "3.8"
-
 services:
+  auth-service:
+    build: .
+    container_name: auth-service
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/auth_db
+      JWT_SECRET: supersecret_change_me
+      PORT: 3001
+    ports:
+      - "3001:3001"
+
   postgres:
     image: postgres:16
     container_name: ecommerce-postgres
@@ -10,3 +21,8 @@ services:
       POSTGRES_DB: auth_db
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
