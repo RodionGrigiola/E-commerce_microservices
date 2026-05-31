@@ -1,7 +1,6 @@
 services:
   auth-service:
     build: .
-    container_name: auth-service
     restart: always
     depends_on:
       - postgres
@@ -11,6 +10,11 @@ services:
       PORT: 3001
     ports:
       - "3001:3001"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/src/generated
+      - ./logs:/app/logs
 
   postgres:
     image: postgres:16

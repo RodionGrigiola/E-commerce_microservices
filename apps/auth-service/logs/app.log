@@ -1,0 +1,21 @@
+2026-05-31T09:21:56.428Z [[32minfo[39m] HTTP Request {"method":"GET","url":"/health","status":304,"duration":"7ms"}
+2026-05-31T09:21:56.519Z [[32minfo[39m] HTTP Request {"method":"GET","url":"/favicon.ico","status":404,"duration":"7ms"}
+2026-05-31T09:27:54.924Z [[32minfo[39m] HTTP Request {"method":"GET","url":"/health","status":304,"duration":"10ms"}
+2026-05-31T09:28:00.121Z [[32minfo[39m] HTTP Request {"method":"GET","url":"/health","status":304,"duration":"3ms"}
+2026-05-31T09:28:01.148Z [[32minfo[39m] HTTP Request {"method":"GET","url":"/health","status":304,"duration":"1ms"}
+2026-05-31T09:28:05.732Z [[33mwarn[39m] HTTP Request {"method":"GET","url":"/","status":404,"duration":"10ms"}
+2026-05-31T09:31:01.760Z [info] HTTP Request {"method":"GET","url":"/health","status":304,"duration":"10ms"}
+2026-05-31T09:42:03.821Z [info] HTTP Request {"method":"GET","url":"/health","status":304,"duration":"5ms"}
+2026-05-31T09:48:35.903Z [info] Auth microservice successfully started {"port":"3001"}
+2026-05-31T09:49:08.094Z [info] Auth microservice successfully started {"port":3001}
+2026-05-31T09:55:45.684Z [info] Auth microservice successfully started {"port":3001}
+2026-05-31T09:55:52.048Z [debug] Health check endpoint evaluated 
+2026-05-31T09:55:52.053Z [info] HTTP Request {"method":"GET","url":"/health","status":304,"duration":"6ms"}
+2026-05-31T10:15:26.754Z [info] Auth microservice successfully started {"port":3001}
+2026-05-31T10:17:16.462Z [info] Auth microservice successfully started {"port":3001}
+2026-05-31T10:23:48.833Z [info] Auth microservice successfully started {"port":3001}
+2026-05-31T10:26:01.096Z [info] Auth microservice successfully started {"port":3001}
+2026-05-31T10:27:08.498Z [info] Auth microservice successfully started {"port":3001}
+2026-05-31T10:28:15.200Z [info] Auth microservice successfully started {"port":3001}
+2026-05-31T10:28:29.063Z [info] Auth microservice successfully started {"port":3001}
+2026-05-31T10:44:21.095Z [info] Auth microservice successfully started {"port":3001}

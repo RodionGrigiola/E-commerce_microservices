@@ -1,7 +1,7 @@
 import { app } from "./app.js";
+import { env } from "./config/env.js";
+import { logger } from "./lib/logger.js";
 
-const PORT = process.env.PORT || 3001;
-
-app.listen(PORT, () => {
-  console.log(`Auth service running on port ${PORT}`);
+app.listen(env.PORT, () => {
+  logger.info(`Auth microservice successfully started`, { port: env.PORT });
 });

@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import { AuthRepository } from "./auth.repository.js";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import { logger } from "../../lib/logger.js";
 
 export class AuthService {
   constructor(private repo: AuthRepository) {}
@@ -10,11 +11,11 @@ export class AuthService {
     const existing = await this.repo.findByEmail(email);
 
     if (existing) {
+      logger.warn("Registration blocked: email already exists", { email });
       throw new Error("User already exists");
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-
     const user = await this.repo.createUser(email, passwordHash);
 
     const accessToken = this.generateAccessToken(user.id);
@@ -28,35 +29,32 @@ export class AuthService {
     });
 
     return {
-      user: {
-        id: user.id,
-        email: user.email,
-      },
+      user: { id: user.id, email: user.email },
       accessToken,
       refreshToken,
     };
   }
 
   async login(email: string, password: string) {
-    // 1. find user
     const user = await this.repo.findByEmail(email);
 
     if (!user) {
+      logger.warn("Login failed: email not found", { email });
       throw new Error("Invalid credentials");
     }
 
-    // 2. check password
     const isValid = await bcrypt.compare(password, user.passwordHash);
 
     if (!isValid) {
+      logger.warn("Login failed: incorrect password", {
+        email,
+        userId: user.id,
+      });
       throw new Error("Invalid credentials");
     }
 
-    // 3. create tokens
     const accessToken = this.generateAccessToken(user.id);
     const refreshToken = this.generateRefreshToken(user.id);
-
-    // 4. store refresh token hash
     const refreshTokenHash = this.hashToken(refreshToken);
 
     await this.repo.saveRefreshToken({
@@ -66,22 +64,15 @@ export class AuthService {
     });
 
     return {
-      user: {
-        id: user.id,
-        email: user.email,
-      },
+      user: { id: user.id, email: user.email },
       accessToken,
       refreshToken,
     };
   }
 
   async logout(refreshToken: string) {
-    // hash incoming token (because we store hash in DB)
     const tokenHash = this.hashToken(refreshToken);
-
-    // revoke it
     await this.repo.revokeRefreshToken(tokenHash);
-
     return { success: true };
   }
 
@@ -90,28 +81,32 @@ export class AuthService {
       throw new Error("No refresh token");
     }
 
-    // 1. verify JWT signature
     let payload: any;
 
     try {
       payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET!);
-      console.log(payload);
-    } catch {
+      logger.debug("Refresh token JWT signature verified", {
+        userId: payload.userId,
+      });
+    } catch (error: any) {
+      logger.warn("Refresh token JWT verification failed", {
+        error: error.message,
+      });
       throw new Error("Invalid refresh token");
     }
 
     const userId: string = payload.userId;
-
-    // 2. check DB (token rotation / revocation protection)
     const tokenHash = this.hashToken(refreshToken);
-
     const storedToken = await this.repo.findValidRefreshToken(tokenHash);
 
     if (!storedToken) {
+      logger.warn(
+        "Security Alert: Attempted use of a revoked or reused refresh token",
+        { userId },
+      );
       throw new Error("Refresh token revoked");
     }
 
-    // 3. generate new tokens
     const newAccessToken = this.generateAccessToken(userId);
     const newRefreshToken = this.generateRefreshToken(userId);
     const newRefreshHash = this.hashToken(newRefreshToken);
@@ -120,7 +115,7 @@ export class AuthService {
     await this.repo.saveRefreshToken({
       tokenHash: newRefreshHash,
       userId,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      expiresAt: this.getRefreshExpiry(),
     });
 
     return {
@@ -130,7 +125,6 @@ export class AuthService {
   }
 
   // helpers
-
   private generateAccessToken(userId: string) {
     return jwt.sign({ userId }, process.env.JWT_ACCESS_SECRET!, {
       expiresIn: "15m",

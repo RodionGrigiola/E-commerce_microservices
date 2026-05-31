@@ -4,6 +4,8 @@ import { AuthService } from "./auth.service.js";
 import { registerSchema } from "./dto/register.dto.js";
 import { loginSchema } from "./dto/login.dto.js";
 import { setRefreshTokenCookie } from "../../utils/cookies.js";
+import { AppError } from "../../utils/AppError.js";
+import { logger } from "../../lib/logger.js"; // Correct import of your custom Winston logger
 
 export class AuthController {
   constructor(private authService: AuthService) {}
@@ -12,17 +14,22 @@ export class AuthController {
     const parsed = registerSchema.safeParse(req.body);
 
     if (!parsed.success) {
-      return res.status(400).json({
-        message: "Validation Error",
-        errors: z.treeifyError(parsed.error),
-      });
+      // Express 5 catches this thrown AppError and routes it instantly to your global errorHandler
+      throw new AppError("Validation Error", 400);
     }
 
     const { email, password } = parsed.data;
 
+    // No try/catch wrapping required. Async rejections bubble up into errorHandler automatically
     const result = await this.authService.register(email, password);
 
     setRefreshTokenCookie(res, result.refreshToken);
+
+    // Operational success logs remain safely inside the core controller context
+    logger.info("User registered successfully", {
+      userId: result.user.id,
+      email,
+    });
 
     return res.status(201).json({
       user: result.user,
@@ -34,10 +41,7 @@ export class AuthController {
     const parsed = loginSchema.safeParse(req.body);
 
     if (!parsed.success) {
-      return res.status(400).json({
-        message: "Validation error",
-        errors: z.treeifyError(parsed.error),
-      });
+      throw new AppError("Validation error", 400);
     }
 
     const { email, password } = parsed.data;
@@ -45,6 +49,11 @@ export class AuthController {
     const result = await this.authService.login(email, password);
 
     setRefreshTokenCookie(res, result.refreshToken);
+
+    logger.info("User logged in successfully", {
+      userId: result.user.id,
+      email,
+    });
 
     return res.status(200).json({
       user: result.user,
@@ -54,15 +63,16 @@ export class AuthController {
 
   logout = async (req: Request, res: Response) => {
     const refreshToken = req.cookies.refreshToken;
-    console.log("cookies token:", refreshToken);
 
     if (!refreshToken) {
-      return res.status(401).json({ message: "No refresh token" });
+      throw new AppError("No refresh token provided", 401);
     }
 
     await this.authService.logout(refreshToken);
 
     res.clearCookie("refreshToken");
+
+    logger.info("User logged out successfully");
 
     return res.status(200).json({ success: true });
   };
@@ -71,12 +81,16 @@ export class AuthController {
     const refreshToken = req.cookies.refreshToken;
 
     if (!refreshToken) {
-      return res.status(401).json({ message: "No refresh token" });
+      throw new AppError("No refresh token provided", 401);
     }
 
     const result = await this.authService.refresh(refreshToken);
 
     setRefreshTokenCookie(res, result.refreshToken);
+
+    logger.info("Token refreshed successfully", {
+      accessTokenLength: result.accessToken.length,
+    });
 
     return res.status(200).json({
       accessToken: result.accessToken,

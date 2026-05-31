@@ -1,5 +1,7 @@
 FROM node:20-alpine
 
+RUN apk add --no-cache openssl libcrypto3
+
 WORKDIR /app
 
 COPY package*.json ./
@@ -7,4 +9,4 @@ RUN npm install
 
 COPY . .
 
-CMD ["npm", "run", "dev"]
+CMD ["sh", "-c", "npx prisma generate && npm run dev"]

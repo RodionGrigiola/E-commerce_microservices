@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { AuthController } from "./auth.controller.js";
 import { authMiddleware } from "../../middlewares/auth.middleware.js";
+import { logger } from "../../lib/logger.js";
 
 export const authRoutes = (controller: AuthController) => {
   const router = Router();
@@ -11,6 +12,8 @@ export const authRoutes = (controller: AuthController) => {
   router.post("/refresh", controller.refresh);
 
   router.get("/me", authMiddleware, (req, res) => {
+    logger.debug("Fetch current user id", { userId: req.user?.id });
+
     res.json({
       id: req.user?.id,
     });

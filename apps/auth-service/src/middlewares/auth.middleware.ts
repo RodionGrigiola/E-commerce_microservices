@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { AppError } from "../utils/AppError.js";
 
 export function authMiddleware(
   req: Request,
@@ -9,15 +10,17 @@ export function authMiddleware(
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
-    return res.status(401).json({ message: "No access token" });
+    throw new AppError("No access token provided", 401);
   }
 
-  const token = authHeader.split(" ")[1];
+  const tokenParts = authHeader.split(" ");
+  const token = tokenParts[1];
 
-  if (!token) {
-    return res.status(401).json({ message: "Invalid token format" });
+  if (tokenParts[0] !== "Bearer" || !token) {
+    throw new AppError("Invalid token format, Bearer schema required", 401);
   }
 
+  // Local try/catch is REQUIRED here to translate technical JWT errors into structured 401 responses
   try {
     const payload = jwt.verify(token, process.env.JWT_ACCESS_SECRET!) as {
       userId: string;
@@ -28,7 +31,7 @@ export function authMiddleware(
     };
 
     next();
-  } catch (err) {
-    return res.status(401).json({ message: "Invalid or expired token" });
+  } catch (err: any) {
+    throw new AppError("Invalid or expired access token", 401);
   }
 }
