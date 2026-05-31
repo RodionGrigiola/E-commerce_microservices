@@ -27,7 +27,7 @@ model AuthUser {
 model RefreshToken {
   id          String   @id @default(uuid())
 
-  tokenHash   String
+  tokenHash   String @unique
   userId      String
   user        AuthUser @relation(fields: [userId], references: [id])
 

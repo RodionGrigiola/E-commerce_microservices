@@ -4,10 +4,12 @@ import { AuthController } from "./modules/auth/auth.controller.js";
 import { AuthService } from "./modules/auth/auth.service.js";
 import { AuthRepository } from "./modules/auth/auth.repository.js";
 import { prisma } from "./db/prisma.js";
+import cookieParser from "cookie-parser";
 
 export const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 
 const repo = new AuthRepository(prisma);
 const service = new AuthService(repo);

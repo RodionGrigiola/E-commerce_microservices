@@ -35,12 +35,18 @@ export class AuthRepository {
     });
   }
 
-  revokeToken(tokenHash: string) {
+  revokeRefreshToken(tokenHash: string) {
     return this.prisma.refreshToken.updateMany({
       where: { tokenHash },
       data: {
         revokedAt: new Date(),
       },
+    });
+  }
+
+  deleteToken(tokenHash: string) {
+    return this.prisma.refreshToken.delete({
+      where: { tokenHash },
     });
   }
 
@@ -53,7 +59,7 @@ export class AuthRepository {
     });
   }
 
-  findValidToken(tokenHash: string) {
+  findValidRefreshToken(tokenHash: string) {
     return this.prisma.refreshToken.findFirst({
       where: {
         tokenHash,

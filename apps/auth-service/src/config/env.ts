@@ -16,4 +16,5 @@ export const env = {
   JWT_SECRET: getEnv("JWT_SECRET"),
   DATABASE_URL: getEnv("DATABASE_URL"),
   PORT: Number(getEnv("PORT")),
+  NODE_ENV: getEnv("NODE_ENV") || "development",
 };
