@@ -12,22 +12,17 @@ const logFormat = printf(({ level, message, timestamp, ...meta }) => {
 export const logger = winston.createLogger({
   level: env.NODE_ENV === "production" ? "info" : "debug",
   transports: [
-    // Консоль: добавляем цвета поверх базового формата
     new winston.transports.Console({
       format: combine(
-        timestamp({ format: "YYYY-MM-DD HH:mm:ss" }), // делаем дату красивой
+        timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
         colorize(),
         logFormat,
       ),
     }),
-    // Файл: принудительно очищаем от цветов (uncolorize)
+
     new winston.transports.File({
       filename: "logs/app.log",
-      format: combine(
-        timestamp(),
-        uncolorize(), // убирает ASCII-символы цвета
-        logFormat,
-      ),
+      format: combine(timestamp(), uncolorize(), logFormat),
     }),
   ],
 });
