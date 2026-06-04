@@ -1,9 +1,9 @@
 import type { Request, Response, NextFunction } from "express";
 import * as Sentry from "@sentry/node";
 import { nodeProfilingIntegration } from "@sentry/profiling-node";
-import { AppError } from "../utils/AppError.js";
-import { logger } from "../lib/logger.js";
-import { env } from "../config/env.js";
+import { AppError } from "../utils/AppError";
+import { logger } from "../lib/logger";
+import { env } from "../config/env";
 
 if (env.SENTRY_DSN) {
   Sentry.init({

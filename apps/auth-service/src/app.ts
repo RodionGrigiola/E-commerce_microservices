@@ -1,13 +1,14 @@
 import express from "express";
 import cookieParser from "cookie-parser";
-import { authRoutes } from "./modules/auth/auth.routes.js";
-import { AuthController } from "./modules/auth/auth.controller.js";
-import { AuthService } from "./modules/auth/auth.service.js";
-import { AuthRepository } from "./modules/auth/auth.repository.js";
-import { prisma } from "./db/prisma.js";
-import { loggerMiddleware } from "./middlewares/logger.middleware.js";
-import { logger } from "./lib/logger.js";
-import { errorHandler } from "./middlewares/errorHandler.middleware.js";
+import { authRoutes } from "./modules/auth/auth.routes";
+import { AuthController } from "./modules/auth/auth.controller";
+import { AuthService } from "./modules/auth/auth.service";
+import { AuthRepository } from "./modules/auth/auth.repository";
+import { prisma } from "./db/prisma";
+import { loggerMiddleware } from "./middlewares/logger.middleware";
+import { logger } from "./lib/logger";
+import { errorHandler } from "./middlewares/errorHandler.middleware";
+import { TokenService } from "./modules/auth/tokenService";
 
 export const app = express();
 
@@ -16,7 +17,8 @@ app.use(express.json());
 app.use(cookieParser());
 
 const repo = new AuthRepository(prisma);
-const service = new AuthService(repo);
+const tokenService = new TokenService();
+const service = new AuthService(repo, tokenService);
 const controller = new AuthController(service);
 
 app.use("/auth", authRoutes(controller));
