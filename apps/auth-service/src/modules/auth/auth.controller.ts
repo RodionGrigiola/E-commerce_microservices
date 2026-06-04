@@ -1,10 +1,10 @@
 import type { Request, Response } from "express";
-import { AuthService } from "./auth.service.js";
-import { registerSchema } from "./dto/register.dto.js";
-import { loginSchema } from "./dto/login.dto.js";
-import { setRefreshTokenCookie } from "../../utils/cookies.js";
-import { AppError } from "../../utils/AppError.js";
-import { logger } from "../../lib/logger.js";
+import { AuthService } from "./auth.service";
+import { registerSchema } from "./dto/register.dto";
+import { loginSchema } from "./dto/login.dto";
+import { setRefreshTokenCookie } from "../../utils/cookies";
+import { AppError } from "../../utils/AppError";
+import { logger } from "../../lib/logger";
 
 export class AuthController {
   constructor(private authService: AuthService) {}
@@ -13,18 +13,15 @@ export class AuthController {
     const parsed = registerSchema.safeParse(req.body);
 
     if (!parsed.success) {
-      // Express 5 catches this thrown AppError and routes it instantly to your global errorHandler
       throw new AppError("Validation Error", 400);
     }
 
     const { email, password } = parsed.data;
 
-    // No try/catch wrapping required. Async rejections bubble up into errorHandler automatically
     const result = await this.authService.register(email, password);
 
     setRefreshTokenCookie(res, result.refreshToken);
 
-    // Operational success logs remain safely inside the core controller context
     logger.info("User registered successfully", {
       userId: result.user.id,
       email,
@@ -61,6 +58,7 @@ export class AuthController {
   }
 
   async logout(req: Request, res: Response) {
+    console.log("LOGOUT HIT");
     const refreshToken = req.cookies.refreshToken;
 
     if (!refreshToken) {

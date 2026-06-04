@@ -1,11 +1,13 @@
 import bcrypt from "bcrypt";
-import { AuthRepository } from "./auth.repository.js";
-import jwt from "jsonwebtoken";
-import crypto from "crypto";
-import { logger } from "../../lib/logger.js";
+import { AuthRepository } from "./auth.repository";
+import { TokenService } from "./tokenService";
+import { logger } from "../../lib/logger";
 
 export class AuthService {
-  constructor(private repo: AuthRepository) {}
+  constructor(
+    private repo: AuthRepository,
+    private tokenService: TokenService,
+  ) {}
 
   async register(email: string, password: string) {
     const existing = await this.repo.findByEmail(email);
@@ -18,14 +20,14 @@ export class AuthService {
     const passwordHash = await bcrypt.hash(password, 10);
     const user = await this.repo.createUser(email, passwordHash);
 
-    const accessToken = this.generateAccessToken(user.id);
-    const refreshToken = this.generateRefreshToken(user.id);
-    const refreshTokenHash = this.hashToken(refreshToken);
+    const accessToken = this.tokenService.generateAccessToken(user.id);
+    const refreshToken = this.tokenService.generateRefreshToken(user.id);
+    const refreshTokenHash = this.tokenService.hashToken(refreshToken);
 
     await this.repo.saveRefreshToken({
       userId: user.id,
       tokenHash: refreshTokenHash,
-      expiresAt: this.getRefreshExpiry(),
+      expiresAt: this.tokenService.getRefreshExpiry(),
     });
 
     return {
@@ -53,14 +55,14 @@ export class AuthService {
       throw new Error("Invalid credentials");
     }
 
-    const accessToken = this.generateAccessToken(user.id);
-    const refreshToken = this.generateRefreshToken(user.id);
-    const refreshTokenHash = this.hashToken(refreshToken);
+    const accessToken = this.tokenService.generateAccessToken(user.id);
+    const refreshToken = this.tokenService.generateRefreshToken(user.id);
+    const refreshTokenHash = this.tokenService.hashToken(refreshToken);
 
     await this.repo.saveRefreshToken({
       userId: user.id,
       tokenHash: refreshTokenHash,
-      expiresAt: this.getRefreshExpiry(),
+      expiresAt: this.tokenService.getRefreshExpiry(),
     });
 
     return {
@@ -71,7 +73,7 @@ export class AuthService {
   }
 
   async logout(refreshToken: string) {
-    const tokenHash = this.hashToken(refreshToken);
+    const tokenHash = this.tokenService.hashToken(refreshToken);
     await this.repo.revokeRefreshToken(tokenHash);
     return { success: true };
   }
@@ -84,7 +86,8 @@ export class AuthService {
     let payload: any;
 
     try {
-      payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET!);
+      // Используем метод из TokenService
+      payload = this.tokenService.verifyRefreshToken(refreshToken);
       logger.debug("Refresh token JWT signature verified", {
         userId: payload.userId,
       });
@@ -96,7 +99,7 @@ export class AuthService {
     }
 
     const userId: string = payload.userId;
-    const tokenHash = this.hashToken(refreshToken);
+    const tokenHash = this.tokenService.hashToken(refreshToken);
     const storedToken = await this.repo.findValidRefreshToken(tokenHash);
 
     if (!storedToken) {
@@ -107,41 +110,20 @@ export class AuthService {
       throw new Error("Refresh token revoked");
     }
 
-    const newAccessToken = this.generateAccessToken(userId);
-    const newRefreshToken = this.generateRefreshToken(userId);
-    const newRefreshHash = this.hashToken(newRefreshToken);
+    const newAccessToken = this.tokenService.generateAccessToken(userId);
+    const newRefreshToken = this.tokenService.generateRefreshToken(userId);
+    const newRefreshHash = this.tokenService.hashToken(newRefreshToken);
 
     await this.repo.deleteToken(tokenHash);
     await this.repo.saveRefreshToken({
       tokenHash: newRefreshHash,
       userId,
-      expiresAt: this.getRefreshExpiry(),
+      expiresAt: this.tokenService.getRefreshExpiry(),
     });
 
     return {
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
     };
-  }
-
-  // helpers
-  private generateAccessToken(userId: string) {
-    return jwt.sign({ userId }, process.env.JWT_ACCESS_SECRET!, {
-      expiresIn: "15m",
-    });
-  }
-
-  private generateRefreshToken(userId: string) {
-    return jwt.sign({ userId }, process.env.JWT_REFRESH_SECRET!, {
-      expiresIn: "7d",
-    });
-  }
-
-  private getRefreshExpiry() {
-    return new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-  }
-
-  private hashToken(token: string) {
-    return crypto.createHash("sha256").update(token).digest("hex");
   }
 }
