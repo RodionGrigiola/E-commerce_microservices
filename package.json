@@ -8,6 +8,8 @@
     "apps/*"
   ],
   "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.9.2",
     "cross-env": "^10.1.0",
     "dotenv-cli": "^11.0.0",

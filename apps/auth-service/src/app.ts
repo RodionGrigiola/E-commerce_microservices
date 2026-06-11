@@ -5,10 +5,8 @@ import { AuthController } from "./modules/auth/auth.controller";
 import { AuthService } from "./modules/auth/auth.service";
 import { AuthRepository } from "./modules/auth/auth.repository";
 import { prisma } from "./db/prisma";
-import { loggerMiddleware } from "./middlewares/logger.middleware";
-import { logger } from "./lib/logger";
-import { errorHandler } from "./middlewares/errorHandler.middleware";
 import { TokenService } from "./modules/auth/tokenService";
+import { errorHandler, logger, loggerMiddleware } from "@ecom/shared";
 
 export const app = express();
 

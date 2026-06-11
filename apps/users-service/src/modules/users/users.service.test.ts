@@ -1,7 +1,7 @@
 import { vi, describe, it, expect, beforeEach, type Mocked } from "vitest";
 import { UsersService } from "./users.service";
 import { UsersRepository } from "./users.repository";
-import { AppError } from "../../utils/AppError";
+import { AppError } from "@ecom/shared";
 
 describe("UsersService (Unit Tests)", () => {
   let usersService: UsersService;

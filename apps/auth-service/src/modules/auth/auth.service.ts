@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import { AuthRepository } from "./auth.repository";
 import { TokenService } from "./tokenService";
-import { logger } from "../../lib/logger";
+import { logger } from "@ecom/shared";
 
 export class AuthService {
   constructor(

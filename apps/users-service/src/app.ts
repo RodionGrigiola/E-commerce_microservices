@@ -5,9 +5,7 @@ import { UsersController } from "./modules/users/users.controller";
 import { UsersService } from "./modules/users/users.service";
 import { UsersRepository } from "./modules/users/users.repository";
 import { prisma } from "./db/prisma";
-import { loggerMiddleware } from "./middlewares/logger.middleware";
-import { logger } from "./lib/logger";
-import { errorHandler } from "./middlewares/errorHandler.middleware";
+import { errorHandler, logger, loggerMiddleware } from "@ecom/shared";
 
 export const app = express();
 

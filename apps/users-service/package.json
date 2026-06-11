@@ -8,7 +8,7 @@
     "dev": "tsx watch --clear-screen=false src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "test": "vitest --exclude src/modules/auth/auth.repository.test.ts",
+    "test": "vitest --exclude src/modules/users/users.repository.test.ts",
     "test:coverage": "vitest run --coverage",
     "db:test:up": "docker compose -f docker-compose.test.yml up -d",
     "db:test:migrate": "dotenv -e .env.test -- prisma migrate deploy",
@@ -20,22 +20,16 @@
   "dependencies": {
     "@ecom/shared": "^1.0.0",
     "@prisma/client": "^5.22.0",
-    "@sentry/node": "^10.55.0",
-    "@sentry/profiling-node": "^10.55.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "jsonwebtoken": "^9.0.3",
     "prisma": "^5.22.0",
-    "winston": "^3.19.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.10",
-    "@types/express": "^5.0.6",
-    "@types/jsonwebtoken": "^9.0.10",
     "@types/supertest": "^7.2.0",
     "supertest": "^7.2.2"
   }

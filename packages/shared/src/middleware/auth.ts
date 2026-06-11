@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { AppError } from "@ecom/shared";
+import { AppError } from "../errors";
 
 export function authMiddleware(
   req: Request,
@@ -20,7 +20,6 @@ export function authMiddleware(
     throw new AppError("Invalid token format, Bearer schema required", 401);
   }
 
-  // Local try/catch is REQUIRED here to translate technical JWT errors into structured 401 responses
   try {
     const payload = jwt.verify(token, process.env.JWT_ACCESS_SECRET!) as {
       userId: string;

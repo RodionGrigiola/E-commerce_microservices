@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { AuthController } from "./auth.controller";
-import { authMiddleware } from "../../middlewares/auth.middleware";
-import { logger } from "../../lib/logger";
+import { authMiddleware } from "@ecom/shared";
+import { logger } from "@ecom/shared";
 
 export const authRoutes = (controller: AuthController) => {
   const router = Router();

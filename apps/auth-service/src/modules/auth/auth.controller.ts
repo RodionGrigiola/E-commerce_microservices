@@ -4,7 +4,7 @@ import { registerSchema } from "./dto/register.dto";
 import { loginSchema } from "./dto/login.dto";
 import { setRefreshTokenCookie } from "../../utils/cookies";
 import { AppError } from "@ecom/shared";
-import { logger } from "../../lib/logger";
+import { logger } from "@ecom/shared";
 
 export class AuthController {
   constructor(private authService: AuthService) {}

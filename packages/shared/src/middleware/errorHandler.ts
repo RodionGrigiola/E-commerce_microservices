@@ -1,18 +1,20 @@
 import type { Request, Response, NextFunction } from "express";
 import * as Sentry from "@sentry/node";
 import { nodeProfilingIntegration } from "@sentry/profiling-node";
-import { AppError } from "@ecom/shared";
+import { AppError } from "../errors";
 import { logger } from "../lib/logger";
-import { env } from "../config/env";
 
-if (env.SENTRY_DSN) {
-  Sentry.init({
-    dsn: env.SENTRY_DSN,
-    integrations: [nodeProfilingIntegration()],
-    tracesSampleRate: 1.0,
-    profilesSampleRate: 1.0,
-    environment: env.NODE_ENV,
-  });
+export function initSentry() {
+  const dsn = process.env.SENTRY_DSN;
+  if (dsn && dsn !== "placeholder") {
+    Sentry.init({
+      dsn,
+      integrations: [nodeProfilingIntegration()],
+      tracesSampleRate: 1.0,
+      profilesSampleRate: 1.0,
+      environment: process.env.NODE_ENV || "development",
+    });
+  }
 }
 
 export function errorHandler(
@@ -24,9 +26,11 @@ export function errorHandler(
   const statusCode = err instanceof AppError ? err.statusCode : 500;
   const isOperational = err instanceof AppError ? err.isOperational : false;
   const errorMessage = err.message || "Internal Server Error";
+  const nodeEnv = process.env.NODE_ENV || "development";
+  const hasSentry =
+    process.env.SENTRY_DSN && process.env.SENTRY_DSN !== "placeholder";
 
   if (!isOperational) {
-    // Critical 500 exceptions (e.g. database crash) get logged with complete stack traces
     logger.error("CRITICAL UNHANDLED EXCEPTION ENCOUNTERED", {
       message: err.message,
       stack: err.stack,
@@ -34,7 +38,7 @@ export function errorHandler(
       method: req.method,
     });
 
-    if (env.SENTRY_DSN) {
+    if (hasSentry) {
       Sentry.withScope((scope) => {
         scope.setTag("path", req.path);
         scope.setTag("method", req.method);
@@ -47,26 +51,23 @@ export function errorHandler(
       });
     }
   } else {
-    // Extract and log full Zod context metadata if available on the error object
     const errorDetails = (err as any).errors || undefined;
 
     logger.warn(`Operational application warning: ${errorMessage}`, {
       path: req.path,
       method: req.method,
       statusCode,
-      details: errorDetails, // Helps to see exact field validation failures in logs/app.log
+      details: errorDetails,
     });
   }
 
   res.status(statusCode).json({
     status: "error",
     message:
-      isOperational || env.NODE_ENV === "development"
+      isOperational || nodeEnv === "development"
         ? errorMessage
         : "Something went wrong internally",
-    // Attach validation fields context to the client response json body if present
     ...((err as any).errors && { errors: (err as any).errors }),
-    ...(env.NODE_ENV === "development" &&
-      !isOperational && { stack: err.stack }),
+    ...(nodeEnv === "development" && !isOperational && { stack: err.stack }),
   });
 }

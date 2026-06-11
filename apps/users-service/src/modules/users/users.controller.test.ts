@@ -5,16 +5,24 @@ import { UsersService } from "./users.service";
 
 vi.mock("./users.service");
 
-vi.mock("../../lib/logger", () => ({
-  logger: { info: vi.fn(), warn: vi.fn(), debug: vi.fn() },
-}));
+vi.mock("@ecom/shared", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@ecom/shared")>();
+  return {
+    ...original,
 
-vi.mock("../../middlewares/auth.middleware", () => ({
-  authMiddleware: (req: any, res: any, next: any) => {
-    req.user = { id: "authenticated-user-uuid-123" };
-    next();
-  },
-}));
+    authMiddleware: (req: any, res: any, next: any) => {
+      req.user = { id: "authenticated-user-uuid-123" };
+      next();
+    },
+
+    logger: {
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      debug: vi.fn(),
+    },
+  };
+});
 
 describe("UsersController (Integration Tests - Real App Engine)", () => {
   const mockUsersService = vi.mocked(UsersService.prototype);
