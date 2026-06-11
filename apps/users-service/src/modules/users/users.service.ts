@@ -1,5 +1,5 @@
 import { UsersRepository } from "./users.repository";
-import { AppError } from "../../utils/AppError";
+import { AppError } from "@ecom/shared";
 
 export class UsersService {
   constructor(private repo: UsersRepository) {}

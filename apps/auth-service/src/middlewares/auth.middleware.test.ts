@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import jwt from "jsonwebtoken";
 import { authMiddleware } from "./auth.middleware";
-import { AppError } from "../utils/AppError";
+import { AppError } from "@ecom/shared";
 import type { Request, Response, NextFunction } from "express";
 
 describe("authMiddleware (Unit Tests)", () => {
