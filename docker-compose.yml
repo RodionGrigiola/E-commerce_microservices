@@ -1,0 +1,81 @@
+services:
+  # =========================================================================
+  # AUTH SERVICE
+  # =========================================================================
+  auth-service:
+    build:
+      context: .
+      dockerfile: apps/auth-service/Dockerfile
+    restart: always
+    depends_on:
+      - postgres-auth
+    ports:
+      - "${AUTH_PORT}:${AUTH_PORT}"
+    environment:
+      - NODE_ENV=${AUTH_NODE_ENV}
+      - PORT=${AUTH_PORT}
+      - DATABASE_URL={AUTH_DATABASE_URL}
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - SENTRY_DSN=${AUTH_SENTRY_DSN}
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/apps/auth-service/src/generated
+      - ./apps/apps/logs:/app/services/auth-service/logs
+    command: npm run dev -w apps/auth-service
+
+  postgres-auth:
+    image: postgres:16
+    container_name: ecommerce-postgres-auth
+    environment:
+      - POSTGRES_USER=${AUTH_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${AUTH_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${AUTH_POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_auth_data:/var/lib/postgresql/data
+
+  # =========================================================================
+  # USERS SERVICE
+  # =========================================================================
+  users-service:
+    build:
+      context: .
+      dockerfile: apps/users-service/Dockerfile
+    restart: always
+    depends_on:
+      - postgres-users
+    ports:
+      - "${USERS_PORT}:${USERS_PORT}"
+    environment:
+      - NODE_ENV=${USERS_NODE_ENV}
+      - PORT=${USERS_PORT}
+      - DATABASE_URL=${USERS_DATABASE_URL}
+      - SENTRY_DSN=${USERS_SENTRY_DSN}
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/apps/users-service/src/generated
+      - ./apps/users-service/logs:/app/apps/users-service/logs
+    command: npm run dev -w apps/users-service
+
+  postgres-users:
+    image: postgres:16
+    container_name: ecommerce-postgres-users
+    environment:
+      - POSTGRES_USER=${USERS_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${USERS_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${USERS_POSTGRES_DB}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_users_data:/var/lib/postgresql/data
+
+# =========================================================================
+# VOLUMES
+# =========================================================================
+volumes:
+  postgres_auth_data:
+  postgres_users_data:

@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import * as Sentry from "@sentry/node";
 import { nodeProfilingIntegration } from "@sentry/profiling-node";
-import { AppError } from "../utils/AppError";
+import { AppError } from "@ecom/shared";
 import { logger } from "../lib/logger";
 import { env } from "../config/env";
 

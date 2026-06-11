@@ -3,7 +3,7 @@ import { AuthService } from "./auth.service";
 import { registerSchema } from "./dto/register.dto";
 import { loginSchema } from "./dto/login.dto";
 import { setRefreshTokenCookie } from "../../utils/cookies";
-import { AppError } from "../../utils/AppError";
+import { AppError } from "@ecom/shared";
 import { logger } from "../../lib/logger";
 
 export class AuthController {

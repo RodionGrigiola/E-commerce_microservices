@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { UsersService } from "./users.service";
 import { updateProfileSchema } from "./dto/update-profile.dto";
-import { AppError } from "../../utils/AppError";
+import { AppError } from "@ecom/shared";
 import { logger } from "../../lib/logger";
 
 export class UsersController {
