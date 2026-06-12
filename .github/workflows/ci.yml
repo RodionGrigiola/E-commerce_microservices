@@ -1,0 +1,78 @@
+name: E-Commerce CI
+
+# Trigger the pipeline on pushes to the main branch or when a Pull Request is created against main
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Clone the repository code onto the GitHub Actions runner agent
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Set up Node.js runtime environment (matching version 22 used in Dockerfiles)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm" # Automatically caches node_modules to speed up subsequent pipeline runs
+
+      # 3. Install dependencies for ALL packages and microservices across the monorepositority
+      - name: Install dependencies
+        run: npm install
+
+      # 4. Compile the shared TypeScript package into JavaScript (populates the dist folder)
+      - name: Build shared package
+        run: npm run build -w @ecom/shared
+
+      # 5. Run isolated unit tests for the shared module (requires no active databases)
+      - name: Run shared package tests
+        run: npm run test -w @ecom/shared
+
+      # =========================================================================
+      # AUTH-SERVICE TESTING STAGE
+      # =========================================================================
+      # Spin up the auth testing database container using the local docker-compose.test file
+      - name: Start Auth Test Database
+        run: npm run db:test:up -w apps/auth-service
+
+      # Apply Prisma migrations (injecting the database connection URL directly into the runner shell context)
+      - name: Deploy Auth Test Migrations
+        env:
+          DATABASE_URL: "postgresql://test_user:test_password@localhost:5441/auth_service_test?schema=public"
+        run: npm run db:test:migrate -w apps/auth-service
+
+      # Execute integration and unit tests for auth-service
+      - name: Run Auth Service Tests
+        env:
+          DATABASE_URL: "postgresql://test_user:test_password@localhost:5441/auth_service_test?schema=public"
+          JWT_ACCESS_SECRET: "test_access_secret_e2e_key"
+          JWT_REFRESH_SECRET: "test_refresh_secret_e2e_key"
+          NODE_ENV: "test"
+        run: vitest run --fileParallelism=false -w apps/auth-service
+
+      # =========================================================================
+      # USERS-SERVICE TESTING STAGE
+      # =========================================================================
+      # Spin up the users testing database container mapped to host port 5442
+      - name: Start Users Test Database
+        run: npm run db:test:up -w apps/users-service
+
+      # Apply Prisma migrations for the users database schema
+      - name: Deploy Users Test Migrations
+        env:
+          DATABASE_URL: "postgresql://test_user:test_password@localhost:5442/users_service_test?schema=public"
+        run: npm run db:test:migrate -w apps/users-service
+
+      # Execute integration and unit tests for users-service (including the newly fixed controllers)
+      - name: Run Users Service Tests
+        env:
+          DATABASE_URL: "postgresql://test_user:test_password@localhost:5442/users_service_test?schema=public"
+          NODE_ENV: "test"
+        run: vitest run --fileParallelism=false -w apps/users-service
