@@ -18,6 +18,7 @@ packages/*/logs/
 
 postgres_auth_data/
 postgres_users_data/
+postgres_products_data/
 .docker-data/
 
 .vscode/
@@ -27,3 +28,7 @@ thumbs.db
 
 coverage/
 .vitest/
+
+# Prisma generated clients
+apps/*/src/generated/
+apps/*/src/modules/generated/
