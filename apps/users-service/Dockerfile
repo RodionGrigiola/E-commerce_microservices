@@ -6,6 +6,8 @@ WORKDIR /app
 
 COPY package*.json ./
 COPY apps/users-service/package.json ./apps/users-service/
+COPY packages/shared/package.json ./packages/shared/
+
 
 RUN npm install
 

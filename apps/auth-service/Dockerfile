@@ -6,6 +6,8 @@ WORKDIR /app
 
 COPY package*.json ./
 COPY apps/auth-service/package.json ./apps/auth-service/
+COPY packages/shared/package.json ./packages/shared/
+
 
 RUN npm install
 

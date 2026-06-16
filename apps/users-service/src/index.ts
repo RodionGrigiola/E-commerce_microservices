@@ -1,7 +1,14 @@
-import { logger } from "@ecom/shared";
 import { app } from "./app";
 import { env } from "./config/env";
+import { setupRabbitMQSubscriptions } from "./rabbit";
+import { logger } from "@ecom/shared";
 
-app.listen(env.PORT, () => {
-  logger.info(`Auth microservice successfully started`, { port: env.PORT });
-});
+async function startServer() {
+  await setupRabbitMQSubscriptions();
+
+  app.listen(env.PORT, () => {
+    logger.info(`Users microservice successfully started`, { port: env.PORT });
+  });
+}
+
+startServer();

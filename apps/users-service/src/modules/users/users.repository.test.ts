@@ -13,8 +13,13 @@ describe("AuthRepository (Database Integration Tests)", () => {
   it("should successfully create a new user profile and find it by id or email", async () => {
     const externalUserId = "auth-generated-uuid-111-222";
     const email = "db_test@example.com";
+    const mockCreatedAt = new Date().toISOString();
 
-    const profile = await repository.createUserProfile(externalUserId, email);
+    const profile = await repository.createUserProfile(
+      externalUserId,
+      email,
+      mockCreatedAt,
+    );
     expect(profile.id).toBe(externalUserId);
     expect(profile.email).toBe(email);
 
@@ -40,8 +45,13 @@ describe("AuthRepository (Database Integration Tests)", () => {
   it("should successfully delete a user profile by id", async () => {
     const externalUserId = "auth-generated-uuid-111-222";
     const email = "db_test@example.com";
+    const mockCreatedAt = new Date().toISOString();
 
-    const profile = await repository.createUserProfile(externalUserId, email);
+    const profile = await repository.createUserProfile(
+      externalUserId,
+      email,
+      mockCreatedAt,
+    );
     expect(profile.id).toBe(externalUserId);
 
     const deletedProfile = await repository.deleteProfile(externalUserId);
@@ -55,8 +65,13 @@ describe("AuthRepository (Database Integration Tests)", () => {
   it("should successfully update a user profile by id", async () => {
     const externalUserId = "auth-generated-uuid-111-222";
     const email = "db_test@example.com";
+    const mockCreatedAt = new Date().toISOString();
 
-    const profile = await repository.createUserProfile(externalUserId, email);
+    const profile = await repository.createUserProfile(
+      externalUserId,
+      email,
+      mockCreatedAt,
+    );
 
     const updateData = {
       firstName: "John",

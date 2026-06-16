@@ -3,9 +3,9 @@ import type { PrismaClient } from "../../generated/prisma/index";
 export class UsersRepository {
   constructor(private prisma: PrismaClient) {}
 
-  createUserProfile(id: string, email: string) {
+  createUserProfile(id: string, email: string, createdAt: string) {
     return this.prisma.userProfile.create({
-      data: { id, email },
+      data: { id, email, createdAt: new Date(createdAt) },
     });
   }
 
