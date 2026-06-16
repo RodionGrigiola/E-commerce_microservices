@@ -14,6 +14,11 @@ export class UsersService {
   }
 
   async updateProfile(id: string, data: any) {
+    await rabbitClient.publish(EcomEvent.PROFILE_UPDATED, {
+      id,
+      email: data.email,
+    });
+
     await this.getProfile(id);
     if (data.email) {
       await rabbitClient.publish(EcomEvent.PROFILE_UPDATED, {

@@ -1,0 +1,72 @@
+services:
+  # --- ТЕСТОВЫЕ БАЗЫ ДАННЫХ ---
+  auth-test-db:
+    image: postgres:15-alpine
+    container_name: ecommerce-auth-test-db
+    environment:
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_DB: auth_service_test
+    ports:
+      - "5441:5432"
+
+  user-test-db:
+    image: postgres:15-alpine
+    container_name: ecommerce-user-test-db
+    environment:
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_DB: user_service_test
+    ports:
+      - "5442:5432"
+
+  # --- ТЕСТОВЫЙ БРОКЕР (ОТДЕЛЬНЫЙ ДЛЯ ТЕСТОВ) ---
+  rabbit-test:
+    image: rabbitmq:3-management-alpine
+    container_name: ecommerce-rabbit-test
+    ports:
+      - "5673:5672" # Основной порт сдвинут на 5673, чтобы не мешать дев-брокеру
+      - "15673:15672"
+
+  # --- СЕРВИСЫ ПРИЛОЖЕНИЙ ---
+  auth-service-test:
+    build:
+      context: .
+      dockerfile: apps/auth-service/Dockerfile
+    container_name: ecommerce-auth-service-test
+    depends_on:
+      - auth-test-db
+      - rabbit-test
+    ports:
+      - "3001:3001" # Порт для HTTP-запросов из тестов
+    environment:
+      - NODE_ENV=test
+      - PORT=3001
+      - DATABASE_URL=postgresql://test_user:test_password@auth-test-db:5432/auth_service_test?schema=public
+      - RABBIT_URL=amqp://rabbit-test:5672
+      - JWT_ACCESS_SECRET=test_access_secret_e2e_key
+      - JWT_REFRESH_SECRET=test_refresh_secret_e2e_key
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: sh -c "DATABASE_URL=postgresql://test_user:test_password@auth-test-db:5432/auth_service_test?schema=public npx prisma generate --schema=./apps/auth-service/prisma/schema.prisma && DATABASE_URL=postgresql://test_user:test_password@auth-test-db:5432/auth_service_test?schema=public npx prisma migrate deploy --schema=./apps/auth-service/prisma/schema.prisma && npm run dev -w apps/auth-service"
+
+  user-service-test:
+    build:
+      context: .
+      dockerfile: apps/users-service/Dockerfile
+    container_name: ecommerce-user-service-test
+    depends_on:
+      - user-test-db
+      - rabbit-test
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=test
+      - PORT=3002
+      - DATABASE_URL=postgresql://test_user:test_password@user-test-db:5432/user_service_test?schema=public
+      - RABBIT_URL=amqp://rabbit-test:5672
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: sh -c "DATABASE_URL=postgresql://test_user:test_password@user-test-db:5432/user_service_test?schema=public npx prisma generate --schema=./apps/users-service/prisma/schema.prisma && DATABASE_URL=postgresql://test_user:test_password@user-test-db:5432/user_service_test?schema=public npx prisma migrate deploy --schema=./apps/users-service/prisma/schema.prisma && npm run dev -w apps/users-service"

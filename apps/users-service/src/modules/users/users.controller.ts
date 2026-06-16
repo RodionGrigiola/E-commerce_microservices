@@ -29,6 +29,7 @@ export class UsersController {
     }
 
     const parsed = updateProfileSchema.safeParse(req.body);
+    console.log("parsed ", parsed);
 
     if (!parsed.success) {
       throw new AppError("Validation Error", 400);

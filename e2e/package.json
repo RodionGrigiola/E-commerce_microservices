@@ -1,0 +1,17 @@
+{
+  "name": "ecom-e2e-tests",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "pretest": "docker compose -f ../docker-compose.test.yml up -d --build && sleep 5",
+    "test": "vitest run --fileParallelism=false",
+    "posttest": "docker compose -f ../docker-compose.test.yml down -v"
+  },
+  "dependencies": {
+    "axios": "^1.7.0"
+  },
+  "devDependencies": {
+    "vitest": "^1.6.0",
+    "typescript": "^5.0.0"
+  }
+}

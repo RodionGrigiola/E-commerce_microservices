@@ -23,6 +23,7 @@ export async function setupRabbitMQSubscriptions() {
       "auth-service.profile-deleted",
       EcomEvent.PROFILE_DELETED,
       async (payload) => {
+        console.log("PAYLOAD IN AUTH: ", payload);
         await prisma.authUser.delete({
           where: { id: payload.id },
         });

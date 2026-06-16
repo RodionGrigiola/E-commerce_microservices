@@ -18,6 +18,7 @@ export const updateProfileSchema = z
       .string()
       .min(5, "Address must be at least 5 characters")
       .optional(),
+    email: z.email().optional(),
   })
   .strict(); // strict() forbids other fields
 

@@ -3,10 +3,23 @@ POST http://localhost:3001/auth/register
 Content-Type: application/json
 
 {
-  "email": "rabbit-test-2@ecom.com",
+  "email": "rabbit-test-3@ecom.com",
   "password": "SuperSecurePassword123"
 }
 
 ### Получение личного профиля (Запрос в Users Service)
 GET http://localhost:3002/users/me
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlNjM5ZjVmZi05ZjkxLTRjMWYtYTRiNC0wNDY4NGQ5MGI0OTQiLCJpYXQiOjE3ODE2MDA1NzQsImV4cCI6MTc4MTYwMTQ3NH0.YxydeWtQ4L4bT6Ob2fJ8svlWbm6-irRRUR1y_Oognis
+
+### Обновление личного профиля (Users Service -> Account Service)
+PUT http://localhost:3002/users/profile
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NzA5NmFjZi01ZjUzLTRmYjItOWZmMC03YzBjMzcyMTI3MjciLCJpYXQiOjE3ODE2MDI0MjksImV4cCI6MTc4MTYwMzMyOX0.pEafONhsc2plSPSX2zKwrWAQzflw6ZDLlm6cFHXXDPE
+
+{
+  "email": "rabbit-updated-email-3@ecom.com"
+}
+
+### Удаление личного профиля (Users Service -> Account Service)
+DELETE http://localhost:3002/users/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzNzBkYTViMy0xYzlmLTRlODYtYTYxYS1kYjdiYmVhMzYzOGQiLCJpYXQiOjE3ODE2MDMwMzUsImV4cCI6MTc4MTYwMzkzNX0.ffzdwHGvdAdxGAkE1WwSyvHKNi6pN4WFLdw8g6jlLGU
