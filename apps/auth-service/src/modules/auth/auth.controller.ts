@@ -9,7 +9,7 @@ import { logger } from "@ecom/shared";
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  async register(req: Request, res: Response) {
+  register = async (req: Request, res: Response) => {
     const parsed = registerSchema.safeParse(req.body);
 
     if (!parsed.success) {
@@ -31,9 +31,9 @@ export class AuthController {
       user: result.user,
       accessToken: result.accessToken,
     });
-  }
+  };
 
-  async login(req: Request, res: Response) {
+  login = async (req: Request, res: Response) => {
     const parsed = loginSchema.safeParse(req.body);
 
     if (!parsed.success) {
@@ -55,9 +55,9 @@ export class AuthController {
       user: result.user,
       accessToken: result.accessToken,
     });
-  }
+  };
 
-  async logout(req: Request, res: Response) {
+  logout = async (req: Request, res: Response) => {
     console.log("LOGOUT HIT");
     const refreshToken = req.cookies.refreshToken;
 
@@ -72,9 +72,9 @@ export class AuthController {
     logger.info("User logged out successfully");
 
     return res.status(200).json({ success: true });
-  }
+  };
 
-  async refresh(req: Request, res: Response) {
+  refresh = async (req: Request, res: Response) => {
     const refreshToken = req.cookies.refreshToken;
 
     if (!refreshToken) {
@@ -92,5 +92,5 @@ export class AuthController {
     return res.status(200).json({
       accessToken: result.accessToken,
     });
-  }
+  };
 }

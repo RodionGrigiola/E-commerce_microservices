@@ -19,4 +19,5 @@ export const env = {
   PORT: Number(process.env.PORT || 3002),
   NODE_ENV: getEnv("NODE_ENV") || "development",
   SENTRY_DSN: getEnv("SENTRY_DSN"),
+  RABBIT_URL: getEnv("RABBIT_URL"),
 };

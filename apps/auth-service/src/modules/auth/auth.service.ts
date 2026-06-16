@@ -1,7 +1,8 @@
 import bcrypt from "bcrypt";
 import { AuthRepository } from "./auth.repository";
 import { TokenService } from "./tokenService";
-import { logger } from "@ecom/shared";
+import { EcomEvent, logger } from "@ecom/shared";
+import { rabbitClient } from "../../rabbit";
 
 export class AuthService {
   constructor(
@@ -19,6 +20,12 @@ export class AuthService {
 
     const passwordHash = await bcrypt.hash(password, 10);
     const user = await this.repo.createUser(email, passwordHash);
+
+    await rabbitClient.publish(EcomEvent.ACCOUNT_REGISTERED, {
+      id: user.id,
+      email: user.email,
+      createdAt: user.createdAt.toISOString(),
+    });
 
     const accessToken = this.tokenService.generateAccessToken(user.id);
     const refreshToken = this.tokenService.generateRefreshToken(user.id);
