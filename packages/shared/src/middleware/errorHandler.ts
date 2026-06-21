@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import * as Sentry from "@sentry/node";
 import { nodeProfilingIntegration } from "@sentry/profiling-node";
-import { AppError } from "../errors";
+import { AppError } from "../errors/AppError";
 import { logger } from "../lib/logger";
 
 export function initSentry() {
