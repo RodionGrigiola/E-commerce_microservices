@@ -122,6 +122,43 @@ services:
     volumes:
       - postgres_products_data:/var/lib/postgresql/data
 
+  # =========================================================================
+  # CART SERVICE
+  # =========================================================================
+
+  cart-service:
+    build:
+      context: .
+      dockerfile: apps/cart-service/Dockerfile
+    restart: always
+    depends_on:
+      - postgres-cart
+    ports:
+      - "${CART_PORT}:${CART_PORT}"
+    environment:
+      - NODE_ENV=${CART_NODE_ENV}
+      - PORT=${CART_PORT}
+      - SENTRY_DSN=${PRODUCTS_SENTRY_DSN}
+      - DATABASE_URL=${CART_DATABASE_URL}
+      - RABBIT_URL=${RABBIT_URL}
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/apps/cart-service/src/generated/prisma
+    command: sh -c "npx prisma generate --schema=./apps/cart-service/prisma/schema.prisma && npx prisma migrate deploy --schema=./apps/cart-service/prisma/schema.prisma && npm run dev -w apps/cart-service"
+
+  postgres-cart:
+    image: postgres:16
+    container_name: ecommerce-postgres-cart
+    environment:
+      - POSTGRES_USER=${CART_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${CART_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${CART_POSTGRES_DB}
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_cart_data:/var/lib/postgresql/data
+
 # =========================================================================
 # VOLUMES
 # =========================================================================
@@ -129,4 +166,5 @@ volumes:
   postgres_auth_data:
   postgres_users_data:
   postgres_products_data:
+  postgres_cart_data:
   rabbitmq_data:

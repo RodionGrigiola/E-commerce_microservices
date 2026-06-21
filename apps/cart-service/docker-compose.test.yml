@@ -1,10 +1,10 @@
 services:
   users-test-db:
     image: postgres:15-alpine
-    container_name: ecommerce-products-test-db
+    container_name: ecommerce-cart-test-db
     environment:
       POSTGRES_USER: test_user
       POSTGRES_PASSWORD: test_password
-      POSTGRES_DB: products_service_test
+      POSTGRES_DB: cart_service_test
     ports:
-      - "5444:5432"
+      - "5445:5432"

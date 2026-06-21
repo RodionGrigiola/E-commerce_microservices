@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { authMiddleware } from "./auth";
-import { AppError } from "../errors";
+import { AppError } from "../errors/AppError";
 
 describe("authMiddleware (Unit Tests)", () => {
   let req: Partial<Request>;

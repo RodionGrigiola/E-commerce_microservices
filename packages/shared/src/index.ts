@@ -1,4 +1,5 @@
-export * from "./errors";
+export * from "./errors/AppError";
+export * from "./errors/ValidationError";
 export * from "./lib/logger";
 export * from "./middleware/auth";
 export * from "./middleware/logger.middleware";
